@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.CommentMapper">
+
+    <!--删除评论信息-->
+    <update id="delete" parameterType="Integer">
+        update oomall_comment
+        set is_deleted=1
+        where id= #{id} and is_deleted=0
+    </update>
+
+    <!--根据货品id删除评论信息-->
+    <update id="deletecommentbyproduct" parameterType="Integer">
+        update oomall_comment
+        set is_deleted=1
+        where product_id= #{id} and is_deleted=0
+    </update>
+
+
+
+    <resultMap type="com.example.demo.domain.Comment" id="commentResultMap">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="statusCode" column="status" />
+        <result property="star" column="star" />
+        <result property="productId" column="product_id" />
+        <result property="gmtCreate" column="gmt_create" />
+        <result property="gmtModified" column="gmt_modified" />
+    </resultMap>
+
+    <select id="goodscommentlist" parameterType="integer" resultMap="commentResultMap">
+        select
+        id,
+        user_id,
+        content,
+        status,
+        star,
+        product_id,
+        gmt_create,
+        gmt_modified
+        from oomall_comment
+        where product_id= #{id} and is_deleted=0
+    </select>
+
+    <!--管理员根据userid和productid获取所有评论-->
+    <select id="adminlist"  resultMap="commentResultMap">
+        select
+        id,
+        user_id,
+        content,
+        status,
+        star,
+        product_id,
+        gmt_create,
+        gmt_modified
+        from oomall_comment
+        <where>
+        <if test="productid != null">
+           product_id= #{productid} and is_deleted=0 and
+        </if>
+        <if test="userid != null">
+             user_id= #{userid} and is_deleted=0 and
+        </if>
+            is_deleted=0
+        </where>
+    </select>
+
+    <!--用户创建货品id的评论-->
+
+    <insert id="createcomment" parameterType="com.example.demo.domain.CommentPo" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+     insert into oomall_comment (
+        user_id,
+        content,
+        status,
+        star,
+        product_id,
+        gmt_create,
+        gmt_modified,
+        is_deleted
+     ) values (
+       #{userId},
+       #{content},
+       #{statusCode},
+       #{star},
+       #{productId},
+        current_timestamp ,
+        current_timestamp ,
+        0
+     )
+    </insert>
+    <!--用户根据评论id获取评论信息-->
+    <resultMap type="com.example.demo.domain.CommentPo" id="commentpoResultMap">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="statusCode" column="status" />
+        <result property="star" column="star" />
+        <result property="productId" column="product_id" />
+        <result property="gmtCreate" column="gmt_create" />
+        <result property="gmtModified" column="gmt_modified" />
+    </resultMap>
+    <select id="goodscomment" parameterType="integer" resultMap="commentpoResultMap">
+        select
+        id,
+        user_id,
+        content,
+        status,
+        star,
+        product_id,
+        gmt_create,
+        gmt_modified
+        from oomall_comment
+        where id= #{id} and is_deleted=0
+    </select>
+    <!--管理员根据评论id审核评论-->
+    <update id="update" parameterType="com.example.demo.domain.CommentPo">
+        update oomall_comment
+        set user_id=#{userId},
+            content=#{content},
+            status=#{statusCode},
+            star=#{star},
+            product_id=#{productId},
+            gmt_modified=current_timestamp
+        where id=#{id} and is_deleted=0
+    </update>
+
+
+</mapper>
